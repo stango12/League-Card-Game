@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.stango.game.assets.Card;
@@ -38,8 +39,9 @@ public class CardGame extends ApplicationAdapter {
 	boolean observe = false;
 	boolean redAction = false;
 	boolean redMove = true;
-	int temp = 0;
 	
+	boolean redTurn = true;
+	private Sprite endButton;
 	//initializing the game
 	private void init()
 	{
@@ -84,6 +86,10 @@ public class CardGame extends ApplicationAdapter {
 		blueTower2 = 30;
 		blueTower3 = 30;
 		blueNexus = 30;
+		
+		endButton = new Sprite(new Texture(Gdx.files.internal("endButton.png")));
+		endButton.setSize(180 / 2, 177 / 2);
+		endButton.setCenter(180 / 4 + 5, 500);
 	}
 	
 	@Override
@@ -103,6 +109,7 @@ public class CardGame extends ApplicationAdapter {
 		
 		batch.begin();
 		batch.draw(background, 0, 0);
+		endButton.draw(batch);
 		//drawing the grid
 		for(int i = 0; i < 3; i++)
 		{
@@ -132,6 +139,15 @@ public class CardGame extends ApplicationAdapter {
 		deadCheck();
 	}
 	
+	public void endTurn(int x, int y)
+	{
+		if(endButton.getBoundingRectangle().contains(x, y))
+		{
+			redTurn = !redTurn;
+			System.out.println("Ended turn!");
+		}
+	}
+	
 	//checking if player selected a skill
 	public void skillCheck()
 	{
@@ -148,8 +164,6 @@ public class CardGame extends ApplicationAdapter {
 	public void deadCheck()
 	{
 
-		if(temp == 0)
-		{
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 5; j++)
@@ -157,15 +171,14 @@ public class CardGame extends ApplicationAdapter {
 				if(red[i][j] != null && red[i][j].isDead())
 				{
 					System.out.println("Red side " + red[i][j].getName() + " has been defeated!");
-					temp++;
+					red[i][j] = null;
 				}
 				if(blue[i][j] != null && blue[i][j].isDead())
 				{
 					System.out.println("Blue side " + blue[i][j].getName() + " has been defeated!");
-					temp++;
+					blue[i][j] = null;
 				}
 			}
-		}
 		}
 		
 	}

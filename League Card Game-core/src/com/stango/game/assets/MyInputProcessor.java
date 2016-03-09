@@ -45,6 +45,8 @@ public class MyInputProcessor implements InputProcessor
 		}
 		else
 			cardgame.leftClickCard(-1, -1);
+		
+		cardgame.endTurn(screenX, screenY);
 		return true;
 	}
 
