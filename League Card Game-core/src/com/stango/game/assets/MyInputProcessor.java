@@ -34,6 +34,7 @@ public class MyInputProcessor implements InputProcessor
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		// TODO Auto-generated method stub
+		cardgame.endTurn(screenX, screenY);
 		if(button == Buttons.RIGHT)
 			cardgame.rightClickCard(screenX, screenY);
 		else
@@ -46,7 +47,6 @@ public class MyInputProcessor implements InputProcessor
 		else
 			cardgame.leftClickCard(-1, -1);
 		
-		cardgame.endTurn(screenX, screenY);
 		return true;
 	}
 

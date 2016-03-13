@@ -13,13 +13,17 @@ public class Card
 	private String name;
 	private Sprite card;
 	private Vector2 position;
+	private Vector2 lastPosition;
+	private boolean onGrid;
 	
 	public Card(String n, int m, Type t)
 	{
 		type = t;
 		mana = m;
 		name = n;
+		onGrid = false;
 		position = new Vector2();
+		lastPosition = new Vector2();
 		card = new Sprite(new Texture(Gdx.files.internal(name + ".png")));
 	}
 
@@ -30,10 +34,27 @@ public class Card
 		position.y = y;
 	}
 	
+	public void setLastPosition(float x, float y)
+	{
+		lastPosition.x = x;
+		lastPosition.y = y;
+	}
+	
+	public void updateLastPosition()
+	{
+		lastPosition.x = position.x;
+		lastPosition.y = position.y;
+	}
+	
 	public void setName(String s)
 	{
 		name = s;
 		card = new Sprite(new Texture(Gdx.files.internal(name + ".png")));
+	}
+	
+	public void setOnGrid(boolean b)
+	{
+		onGrid = b;
 	}
 	
 	public void makeEmpty()
@@ -62,6 +83,16 @@ public class Card
 	public Vector2 getPosition()
 	{
 		return position;
+	}
+	
+	public Vector2 getLastPosition()
+	{
+		return lastPosition;
+	}
+	
+	public boolean onGrid()
+	{
+		return onGrid;
 	}
 	
 	public void render(SpriteBatch batch)

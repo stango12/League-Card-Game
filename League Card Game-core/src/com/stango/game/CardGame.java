@@ -1,5 +1,7 @@
 package com.stango.game;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -19,32 +21,43 @@ public class CardGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	private OrthographicCamera camera;
 	Texture background;
+	private Sprite endButton;
+	
+	//cards in hand positions
+	private Vector2[] handPositions = new Vector2[5];
 	
 	//red side stuff
 	private Champion[][] red = new Champion[3][5];
 	private Card[][] redGrid = new Card[3][5];
-	private Card[] redDeck;
+	private ArrayList<Card> redDeck = new ArrayList<Card>();
+	private Card[] redHand = new Card[5];
 	private int redTower1, redTower2, redTower3;
 	private int redNexus;
+	private int redHandSize;
 	
 	//blue side stuff
 	private Champion[][] blue = new Champion[3][5];
 	private Card[][] blueGrid = new Card[3][5];
-	private Card[] blueDeck;
+	private ArrayList<Card> blueDeck = new ArrayList<Card>();
+	private Card[] blueHand = new Card[5];
 	private int blueTower1, blueTower2, blueTower3;
 	private int blueNexus;
+	private int blueHandSize;
 	
 	//variables
-	private Vector2 lastRed;
 	boolean observe = false;
 	boolean redAction = false;
 	boolean redMove = true;
 	
 	boolean redTurn = true;
-	private Sprite endButton;
+	
 	//initializing the game
 	private void init()
 	{
+		
+		redHandSize = 0;
+		blueHandSize = 0;
+		
 		//empty grid
 		for(int i = 0; i < 3; i++)
 		{
@@ -58,11 +71,21 @@ public class CardGame extends ApplicationAdapter {
 			}
 		}
 		
+		//putting hand positions into array
+		for(int i = 0; i < handPositions.length; i++)
+		{
+			handPositions[i] = new Vector2(420/4 + (420 / 2) * i, 590/4);
+		}
+		
 		//testing with one card
-		redDeck  = new Card[]{new Ashe()};
-		redDeck[0].getSprite().setSize(420 / 2, 590 / 2);
-		redDeck[0].setPosition(420/4, 590/4);
-		lastRed = new Vector2(420/4, 590/4);
+		redDeck.add(new Ashe());
+		
+		//adding card to hand
+		redHand[0] = new Ashe();
+		redHand[0].getSprite().setSize(420 / 2, 590 / 2);
+		redHand[0].setPosition(handPositions[0].x, handPositions[0].y);
+		redHand[0].updateLastPosition();
+		redHandSize++;
 		
 		//background image
 		background = new Texture("SRBackground.png");
@@ -110,6 +133,7 @@ public class CardGame extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(background, 0, 0);
 		endButton.draw(batch);
+		
 		//drawing the grid
 		for(int i = 0; i < 3; i++)
 		{
@@ -119,6 +143,7 @@ public class CardGame extends ApplicationAdapter {
 				blueGrid[i][j].render(batch);
 			}
 		}
+		
 		//drawing the champ cards on the field
 		for(int i = 0; i < 3; i++)
 		{
@@ -130,21 +155,26 @@ public class CardGame extends ApplicationAdapter {
 					blue[i][j].render(batch);
 			}
 		}
+		
 		//displaying red's hand
-		for(int i = 0; i < redDeck.length; i++)
-			redDeck[i].render(batch);
+		for(int i = 0; i < redHandSize; i++)
+			redHand[i].render(batch);
+		
 		batch.end();
 		
 		skillCheck();
 		deadCheck();
 	}
 	
+	//end turn logic
 	public void endTurn(int x, int y)
 	{
 		if(endButton.getBoundingRectangle().contains(x, y))
 		{
 			redTurn = !redTurn;
 			System.out.println("Ended turn!");
+			redMove = true;
+			drawRedCard();
 		}
 	}
 	
@@ -183,6 +213,21 @@ public class CardGame extends ApplicationAdapter {
 		
 	}
 	
+	//drawing a card for red
+	public void drawRedCard()
+	{
+		if(!redDeck.isEmpty())
+		{
+			redHand[redHandSize] = redDeck.get(0);
+			redHand[redHandSize].getSprite().setSize(420 / 2, 590 / 2);
+			redHand[redHandSize].setPosition(handPositions[redHandSize].x, handPositions[redHandSize].y);
+			redHand[redHandSize].updateLastPosition();
+			redDeck.remove(0);
+			redHandSize++;
+		}
+	}
+	
+	//checking if card is on any grid
 	public boolean onGrid(Card c)
 	{
 		return findCardOnGridRed(c).y != -1 || findCardOnGridBlue(c).y != -1;
@@ -217,24 +262,26 @@ public class CardGame extends ApplicationAdapter {
 	//right clicking a card zooms in
 	public void rightClickCard(int x, int y)
 	{
-		if(redDeck[0].getSprite().getBoundingRectangle().contains(x,1000 - y))
+		if(redHand[0].getSprite().getBoundingRectangle().contains(x,1000 - y))
 		{
 			if(!observe)
-				lastRed = new Vector2(redDeck[0].getPosition().x, redDeck[0].getPosition().y);
-			redDeck[0].getSprite().setSize(420, 590);
-			redDeck[0].setPosition(800, 500);
+				redHand[0].updateLastPosition();
+			redHand[0].getSprite().setSize(420, 590);
+			redHand[0].setPosition(800, 500);
 			observe = true;
 		}
-		else if(redMove)
+		else if(!redHand[0].onGrid())
 		{		
-			redDeck[0].getSprite().setSize(420 / 2, 590 / 2);
-			redDeck[0].setPosition(lastRed.x, lastRed.y);
+			redHand[0].getSprite().setSize(420 / 2, 590 / 2);
+			Vector2 temp = redHand[0].getLastPosition();
+			redHand[0].setPosition(temp.x, temp.y);
 			observe = false;
 		}
 		else
 		{
-			redDeck[0].getSprite().setSize(420 / 4, 590 / 4);
-			redDeck[0].setPosition(lastRed.x, lastRed.y);
+			redHand[0].getSprite().setSize(420 / 4, 590 / 4);
+			Vector2 temp = redHand[0].getLastPosition();
+			redHand[0].setPosition(temp.x, temp.y);
 			observe = false;
 		}
 	}
@@ -248,17 +295,17 @@ public class CardGame extends ApplicationAdapter {
 				if(blue[i][j] != null && redAction && blue[i][j].getSprite().getBoundingRectangle().contains(x,1000 - y))
 				{
 					//checks if the attack is valid by seeing if both champs are on the same column
-					if(findCardOnGridBlue(blue[i][j]).y == findCardOnGridRed(redDeck[0]).y && findCardOnGridBlue(blue[i][j]).y != -1)
+					if(findCardOnGridBlue(blue[i][j]).y == findCardOnGridRed(redHand[0]).y && findCardOnGridBlue(blue[i][j]).y != -1)
 					{
 						System.out.println("Attack!");
-						Champion temp = (Champion)redDeck[0];
+						Champion temp = (Champion)redHand[0];
 						blue[i][j].setHp(blue[i][j].getHp() - temp.getAtk());
 						System.out.println("Ashe health: " + blue[i][j].getHp());
 					}
 				}
 		
 		//moving from hand to grid
-		if(redDeck[0].getSprite().getBoundingRectangle().contains(x,1000 - y))
+		if(redHand[0].getSprite().getBoundingRectangle().contains(x,1000 - y))
 			redAction = true;
 		else
 			redAction = false;
@@ -275,13 +322,14 @@ public class CardGame extends ApplicationAdapter {
 			{
 				if(redGrid[i][j].getSprite().getBoundingRectangle().contains(x, 1000 - y))
 				{
-					//redGrid[i][j].setName(redDeck[0].getName());
+					//redGrid[i][j].setName(redHand[0].getName());
 					Vector2 temp = redGrid[i][j].getPosition();
-					redDeck[0].getSprite().setSize(420/4, 590/4);
-					redDeck[0].setPosition(temp.x, temp.y);
-					red[i][j] = (Champion) redDeck[0];
-					lastRed = new Vector2(temp.x, temp.y);
+					redHand[0].getSprite().setSize(420/4, 590/4);
+					redHand[0].setPosition(temp.x, temp.y);
+					red[i][j] = (Champion) redHand[0];
+					redHand[0].setLastPosition(temp.x, temp.y);
 					redMove = false;
+					redHand[0].setOnGrid(true);
 				}
 			}
 		}
