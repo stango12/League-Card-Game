@@ -14,14 +14,16 @@ public class Card
 	private Sprite card;
 	private Vector2 position;
 	private Vector2 lastPosition;
-	private boolean onGrid;
+	private boolean action;
+	private boolean move;
 	
 	public Card(String n, int m, Type t)
 	{
 		type = t;
 		mana = m;
 		name = n;
-		onGrid = false;
+		action = false;
+		move = false;
 		position = new Vector2();
 		lastPosition = new Vector2();
 		card = new Sprite(new Texture(Gdx.files.internal(name + ".png")));
@@ -52,9 +54,14 @@ public class Card
 		card = new Sprite(new Texture(Gdx.files.internal(name + ".png")));
 	}
 	
-	public void setOnGrid(boolean b)
+	public void setAction(boolean b)
 	{
-		onGrid = b;
+		action = b;
+	}
+	
+	public void setMove(boolean b)
+	{
+		move = b;
 	}
 	
 	public void makeEmpty()
@@ -90,9 +97,14 @@ public class Card
 		return lastPosition;
 	}
 	
-	public boolean onGrid()
+	public boolean getAction()
 	{
-		return onGrid;
+		return action;
+	}
+	
+	public boolean getMove()
+	{
+		return move;
 	}
 	
 	public void render(SpriteBatch batch)
