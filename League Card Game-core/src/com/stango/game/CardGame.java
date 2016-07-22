@@ -31,6 +31,7 @@ public class CardGame extends ApplicationAdapter {
 	private Card[][] redGrid = new Card[3][5];
 	private ArrayList<Card> redDeck = new ArrayList<Card>();
 	private ArrayList<Card> redHand = new ArrayList<Card>();
+	private ArrayList<Card> onFieldRed = new ArrayList<Card>();
 	private int redTower1, redTower2, redTower3;
 	private int redNexus;
 
@@ -182,6 +183,7 @@ public class CardGame extends ApplicationAdapter {
 				}
 			}
 			drawRedCard();
+			checkRedField();
 		}
 	}
 	
@@ -268,6 +270,7 @@ public class CardGame extends ApplicationAdapter {
 	//right clicking a card zooms in
 	public void rightClickCard(int x, int y)
 	{
+		//checking the hand
 		for(int i = 0; i < redHand.size(); i++)
 		{
 			if(redHand.get(i).getSprite().getBoundingRectangle().contains(x,1000 - y))
@@ -286,6 +289,8 @@ public class CardGame extends ApplicationAdapter {
 				observe = false;
 			}
 		}
+		
+		//checking the field
 		for(int i = 0; i < 3; i++)
 			for(int j = 0; j < 5; j++)
 			{
@@ -316,20 +321,34 @@ public class CardGame extends ApplicationAdapter {
 		//attacking
 		for(int i = 0; i < 3; i++)
 			for(int j = 0; j < 5; j++)
-				for(int k = 0; k < redHand.size(); k++)
-					if(blue[i][j] != null && redHand.get(k).getAction() && blue[i][j].getSprite().getBoundingRectangle().contains(x,1000 - y))
+				for(int k = 0; k < onFieldRed.size(); k++)
+					if(blue[i][j] != null && onFieldRed.get(k).getPicked() && blue[i][j].getSprite().getBoundingRectangle().contains(x,1000 - y))
 					{
 						//checks if the attack is valid by seeing if both champs are on the same column
-						if(findCardOnGridBlue(blue[i][j]).y == findCardOnGridRed(redHand.get(0)).y && findCardOnGridBlue(blue[i][j]).y != -1)
+						if(findCardOnGridBlue(blue[i][j]).y == findCardOnGridRed(onFieldRed.get(k)).y && findCardOnGridBlue(blue[i][j]).y != -1)
 						{
 							System.out.println("Attack!");
-							Champion temp = (Champion)redHand.get(0);
+							Champion temp = (Champion)onFieldRed.get(k);
 							blue[i][j].setHp(blue[i][j].getHp() - temp.getAtk());
 							System.out.println("Ashe health: " + blue[i][j].getHp());
+							temp.setPicked(false);
+							temp.setAction(true);
 						}
 					}
 		
-		//moving from hand to grid
+		for(int i = 0; i < 3; i++)
+			for(int j = 0; j < 5; j++)
+			{
+				if(red[i][j] != null && !red[i][j].getAction())
+				{
+					red[i][j].setPicked(true);
+				}
+				else if(red[i][j] != null)
+					red[i][j].setPicked(false);
+			}
+		
+
+		//checking hand
 		for(int i = 0; i < redHand.size(); i++)
 		{
 			if(redHand.get(i).getSprite().getBoundingRectangle().contains(x,1000 - y))
@@ -338,6 +357,7 @@ public class CardGame extends ApplicationAdapter {
 				redHand.get(i).setAction(false);
 		}
 		
+		//checking grid
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 5; j++)
@@ -354,6 +374,7 @@ public class CardGame extends ApplicationAdapter {
 	//To Do: fix movement/update when you move around the grid
 	public void moveCard(int x, int y)
 	{
+		//moving from hand to grid
 		for(int k = 0; k < redHand.size(); k++)
 		{
 			if(redHand.get(k).getAction() && !redHand.get(k).getMove())
@@ -371,6 +392,8 @@ public class CardGame extends ApplicationAdapter {
 							red[i][j] = (Champion) redHand.get(k);
 							redHand.get(k).setLastPosition(temp.x, temp.y);
 							redHand.get(k).setMove(true);
+							onFieldRed.add(redHand.get(k));
+							redHand.remove(k);
 							return;
 						}
 					}
@@ -378,6 +401,7 @@ public class CardGame extends ApplicationAdapter {
 			}
 		}
 		
+		//moving from grid to grid
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 5; j++)
@@ -388,11 +412,11 @@ public class CardGame extends ApplicationAdapter {
 					{
 						for(int b = 0; b < 5; b++)
 						{
-							if(red[a][b] != null && !red[a][b].getMove())
+							if(red[a][b] != null && !red[a][b].getMove() && red[a][b].getAction() && (i != a || j != b))
 							{
 								Vector2 temp = redGrid[i][j].getPosition();
 								red[a][b].getSprite().setSize(420/4, 590/4);
-								red[a][a].setPosition(temp.x, temp.y);
+								red[a][b].setPosition(temp.x, temp.y);
 								red[a][b].setLastPosition(temp.x, temp.y);
 								red[a][b].setMove(true);
 								red[i][j] = red[a][b];
@@ -404,6 +428,15 @@ public class CardGame extends ApplicationAdapter {
 				}
 			}
 		}
+	}
+	
+	//for debugging purposes, prints the field
+	private void checkRedField()
+	{
+		for(int i = 0; i < 3; i++)
+			for(int j = 0; j < 5; j++)
+				if(red[i][j] != null)
+					System.out.println("(" + i + ", " + j + "):" + red[i][j].getName());
 	}
 	
 }

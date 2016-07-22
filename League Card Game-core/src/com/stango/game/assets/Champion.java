@@ -5,6 +5,7 @@ public class Champion extends Card
 	private int maxhp, hp, atk, def, rec;
 	private int mana1, mana2, cd1, cd2;
 	private boolean cc;
+	private String name;
 	
 	public Champion(String n, int h, int a, int d, int r, int m1, int cd1, int m2, int cd2, Type t) {
 		super(n, 0, t);
@@ -18,6 +19,7 @@ public class Champion extends Card
 		mana2 = m2;
 		this.cd2 = cd2;
 		cc = false;
+		name = n;
 		}
 
 	public int getMana1() {
@@ -96,4 +98,10 @@ public class Champion extends Card
 	{
 		return hp <= 0;
 	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	
 }

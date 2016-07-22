@@ -16,6 +16,7 @@ public class Card
 	private Vector2 lastPosition;
 	private boolean action;
 	private boolean move;
+	private boolean picked;
 	
 	public Card(String n, int m, Type t)
 	{
@@ -24,6 +25,7 @@ public class Card
 		name = n;
 		action = false;
 		move = false;
+		picked = false;
 		position = new Vector2();
 		lastPosition = new Vector2();
 		card = new Sprite(new Texture(Gdx.files.internal(name + ".png")));
@@ -110,6 +112,16 @@ public class Card
 	public void render(SpriteBatch batch)
 	{
 		card.draw(batch);
+	}
+	
+	public void setPicked(boolean p)
+	{
+		picked = p;
+	}
+	
+	public boolean getPicked()
+	{
+		return picked;
 	}
 	
 	public enum Type
